@@ -54,7 +54,7 @@ findPairings xs =
           swap Pair{..} = Pair right left joinType
       handlePair lEnt rEnt =
         case (cons (eEntityType lEnt) (eFields lEnt), cons (eEntityType lEnt) (eFields rEnt)) of
-          ([(lFC, lMC)], [(rFC, rMC)])
+          ((lFC, lMC) : _, (rFC, rMC) : _)
             | not (lMC == Present && rMC == Present) -- It doesn't make much sense for the primary key to be nullable
             -> Just (Pair (InstanceEntity (eEntityType lEnt) lFC lMC) (InstanceEntity (eEntityType rEnt) rFC rMC) (Tagged . AppT (ConT ''E.Key) . unTagged . eEntityType $ lEnt))
           _ -> Nothing
