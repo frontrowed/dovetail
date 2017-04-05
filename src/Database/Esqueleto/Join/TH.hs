@@ -82,7 +82,7 @@ mkInstance Pair{..} =
       spliceMaybeCon = pure . promote . ieMaybeCon
       spliceTCon = pure . unTagged . ieEntityType
       spliceCon = mkCon . unTagged . ieFieldConstructor
-      mkCon (NormalC name _) = conE name
+      mkCon (GadtC (name : _) _ _) = conE name
       mkCon _ = error "Field key doesn't use a normal constructor"
 
 entityFieldInstances :: Q [Tagged "EntityField" Dec]
@@ -91,11 +91,11 @@ entityFieldInstances = do
   pure $ Tagged <$> instances
 
 entityType :: Tagged "EntityField" Dec -> Tagged "Entity" Type
-entityType (Tagged (DataInstD _ _ [ty, _] _ _)) = Tagged ty
+entityType (Tagged (DataInstD _ _ [ty, _] _ _ _)) = Tagged ty
 entityType _ = error "`EntityField` not returning `DataInstD`"
 
 entityFieldConstructors :: Tagged "EntityField" Dec -> [Tagged "ForAllFieldConstructor" Con]
-entityFieldConstructors (Tagged (DataInstD _ _ _ cons _)) = Tagged <$> cons
+entityFieldConstructors (Tagged (DataInstD _ _ _ _ cons _)) = Tagged <$> cons
 entityFieldConstructors _ = error "`EntityField` not returning `DataInstD`"
 
 data EntityField
@@ -108,7 +108,7 @@ data EntityField
 fieldKeyConstructors :: Tagged "ForAllFieldConstructor" Con -> Q (Maybe EntityField)
 fieldKeyConstructors (Tagged con) =
   case con of
-    (ForallC [] [AppT _equalityT ty] con') ->
+    (ForallC _ [AppT _equalityT ty] con') ->
       (uncurry (mkEntityField con') <$$>) . expandSyns' . extractEntityType =<< expandSyns ty
     _ -> pure Nothing
   where
