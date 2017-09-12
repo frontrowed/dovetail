@@ -109,7 +109,7 @@ fieldKeyConstructors :: Tagged "ForAllFieldConstructor" Con -> Q (Maybe EntityFi
 fieldKeyConstructors (Tagged con) =
   case con of
     (ForallC _ [AppT _equalityT ty] con') ->
-      (uncurry (mkEntityField con') <$$>) . expandSyns' . extractEntityType =<< expandSyns ty
+      (uncurry (mkEntityField con') <$$>) . expandSyns' . extractEntityType =<< expandSynsWith noWarnTypeFamilies ty
     _ -> pure Nothing
   where
     mkEntityField (Tagged -> efFieldConstructor) (Tagged -> efFieldOutType) efMaybeCon = EntityField{..}
