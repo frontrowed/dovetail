@@ -113,7 +113,7 @@ fieldKeyConstructors (Tagged con) =
     _ -> pure Nothing
   where
     mkEntityField (Tagged -> efFieldConstructor) (Tagged -> efFieldOutType) efMaybeCon = EntityField{..}
-    expandSyns' (Just (ty, con')) = Just . (, con') <$> expandSyns ty
+    expandSyns' (Just (ty, con')) = Just . (, con') <$> expandSynsWith noWarnTypeFamilies ty
     expandSyns' Nothing = pure Nothing
     extractEntityType (AppT (ConT k) ty)
       | k == ''E.Key = Just (ty, Absent)
